@@ -68,10 +68,10 @@ spec:
       serviceAccountName: kippy-sa
       containers:
       - env:
-        - name: API_KEY
+        - name: SENDGRID_API_KEY
           valueFrom:
             secretKeyRef:
-              key: apiKey
+              key: sendgridApiKey
               name: kippy-secret
         - name: DISCORD_WEBHOOK
           valueFrom:
