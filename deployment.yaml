@@ -6,10 +6,10 @@ metadata:
   namespace: kube-system
 type: Opaque
 stringData:
-  apiKey: ""
   discordWebhook: ""
   slackWebhook: ""
   genericWebhook: ""
+  sendgridApiKey: ""
   email: ""
 ---
 apiVersion: v1
