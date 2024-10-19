@@ -7,6 +7,7 @@ import (
 	"github.com/jeefy/kippy/pkg/config"
 	"github.com/jeefy/kippy/pkg/types"
 	"github.com/spf13/viper"
+	v1 "k8s.io/api/core/v1"
 )
 
 func SendNotification(HeartBeat *types.KippyHeartbeat, HeartBeatLock *sync.Mutex) error {
@@ -25,6 +26,9 @@ func SendNotification(HeartBeat *types.KippyHeartbeat, HeartBeatLock *sync.Mutex
 			log.Printf("%v", event)
 		}
 	}
+
+	// Clear the events after we've filtered them
+	HeartBeat.Events = []*v1.Event{}
 
 	HeartBeatLock.Unlock()
 
