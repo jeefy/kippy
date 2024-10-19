@@ -1,0 +1,106 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kippy-secret
+  namespace: kube-system
+type: Opaque
+stringData:
+  apiKey: ""
+  discordWebhook: ""
+  slackWebhook: ""
+  genericWebhook: ""
+  email: ""
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kippy-sa
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kippy
+rules:
+- apiGroups: ["events.k8s.io"]
+  resources: ["*"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: [""]
+  resources: ["pods", "events"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: ["metrics.k8s.io"]
+  resources: ["*"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kippy-binding
+roleRef: # points to the Role
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kippy
+subjects: # points to the ServiceAccount
+- kind: ServiceAccount
+  name: kippy-sa # service account to bind to
+  namespace: kube-system # ns of service account
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kippy
+  name: kippy
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kippy
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: kippy
+    spec:
+      serviceAccountName: kippy-sa
+      containers:
+      - env:
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              key: apiKey
+              name: kippy-secret
+        - name: DISCORD_WEBHOOK
+          valueFrom:
+            secretKeyRef:
+              key: discordWebhook
+              name: kippy-secret
+        - name: SLACK_WEBHOOK
+          valueFrom:
+            secretKeyRef:
+              key: slackWebhook
+              name: kippy-secret
+        - name: GENERIC_WEBHOOK
+          valueFrom:
+            secretKeyRef:
+              key: genericWebhook
+              name: kippy-secret
+        - name: EMAIL
+          valueFrom:
+            secretKeyRef:
+              key: email
+              name: kippy-secret
+        image: ghcr.io/jeefy/kippy:main
+        imagePullPolicy: Always
+        name: kippy
+        resources:
+          limits:
+            cpu: "1"
+            memory: 2Gi
+          requests:
+            cpu: 500m
+            memory: 1Gi
+---
