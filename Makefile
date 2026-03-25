@@ -7,7 +7,7 @@ build:
 	go build -o bin/kippy cmd/main.go
 
 run:
-	go run cmd/main.go --discordWebhook="REDACTED_DISCORD_WEBHOOK"
+	go run cmd/main.go --discordWebhook="${DISCORD_WEBHOOK_URL}"
 
 image:
 	docker build -t ${WHOAMI}/kippy -f Dockerfile .
